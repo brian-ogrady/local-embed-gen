@@ -100,6 +100,11 @@ def main(args):
                     pl.Series("bgem3_sparse_indices", sparse_indices),
                     pl.Series("bgem3_sparse_values", sparse_values)
                 )
+            elif model_config["type"] == "pylate":
+                embeddings = [emb.tolist() for emb in embeddings]
+                output_chunk = output_chunk.with_columns(
+                    pl.Series(args.model_name, embeddings)
+                )
             else:
                 output_chunk = output_chunk.with_columns(
                     pl.Series(args.model_name, embeddings)
