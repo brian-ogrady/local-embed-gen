@@ -1,0 +1,54 @@
+[
+    {
+        "bm25": {
+            "type": "fastembed",
+            "model_name": "Qdrant/bm25", 
+            "output_key": "bm25_vector", 
+            "id_key": "id"
+        },
+        "bgem3": {
+            "type": "flagembedding",
+            "model_name": "BAAI/bge-m3",
+            "output_key": "bgem3_dense_vector", 
+            "id_key": "id",
+            "encode_kwargs": {
+                "return_colbert_vecs": true,
+                "return_dense": true,
+                "return_sparse": true
+            }
+        },
+        "e5large": {
+            "type": "sentencetransformers",
+            "model_name": "intfloat/multilingual-e5-large", 
+            "output_key": "e5large_vector", 
+            "id_key": "id"
+        },
+        "paraphrase": {
+            "type": "sentencetransformers", 
+            "model_name": "sentence-transformers/paraphrase-multilingual-mpnet-base-v2", 
+            "output_key": "paraphrase_vector", 
+            "id_key": "id"
+        },
+        "gte": {
+            "type": "sentencetransformers",
+            "model_name": "Alibaba-NLP/gte-multilingual-base", 
+            "output_key": "gte_vector", 
+            "id_key": "id", 
+            "model_kwargs": {
+                "trust_remote_code": true
+            }
+        },
+        "qwen": {
+            "type": "sentencetransformers", 
+            "model_name": "Qwen/Qwen3-Embedding-0.6B", 
+            "output_key": "qwen_vector", 
+            "id_key": "id"
+        },
+        "gte_colbert": {
+            "type": "pylate",
+            "model_name": "lightonai/GTE-ModernColBERT-v1",
+            "output_key": "colbert_vectors",
+            "id_key": "id"
+        }
+    }
+]
