@@ -16,7 +16,11 @@ def get_model(model_config: Dict[str, Any]):
     elif model_config["type"] == "flagembedding":
         model = BGEM3FlagModel(model_config["model_name"], device="mps")
     elif model_config["type"] == "pylate":
-        model = ColBERT(model_config["model_name"], device="mps")
+        model = ColBERT(
+            model_config["model_name"], 
+            device="mps", 
+            **model_config.get("model_kwargs", {})
+        )
     else:
         model = SentenceTransformer(
             model_config["model_name"], 
