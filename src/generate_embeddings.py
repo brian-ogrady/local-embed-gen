@@ -9,6 +9,8 @@ from FlagEmbedding import BGEM3FlagModel
 from pylate.models import ColBERT
 from sentence_transformers import SentenceTransformer
 
+from gte_embedding_base import GTEEmbedding
+
 
 def get_model(model_config: Dict[str, Any]):
     if model_config["type"] == "fastembed":
@@ -17,6 +19,12 @@ def get_model(model_config: Dict[str, Any]):
         model = BGEM3FlagModel(model_config["model_name"], device="mps")
     elif model_config["type"] == "pylate":
         model = ColBERT(
+            model_config["model_name"], 
+            device="mps", 
+            **model_config.get("model_kwargs", {})
+        )
+    elif model_config["type"] == "gte":
+        model = GTEEmbedding(
             model_config["model_name"], 
             device="mps", 
             **model_config.get("model_kwargs", {})
@@ -87,19 +95,35 @@ def main(args):
             print(f"Encoding {len(texts_to_embed)} texts...")
             embeddings = generate_embeddings(model, model_config, texts_to_embed)
             
-            if model_config["type"] == "flagembedding" and isinstance(embeddings, dict):
-                lexical_weights = embeddings["lexical_weights"]
-                sparse_indices = [[int(k) for k in d.keys()] for d in lexical_weights]
-                sparse_values = [[float(v) for v in d.values()] for d in lexical_weights]
+            if isinstance(embeddings, dict):
 
-                colbert_embeddings = [emb.tolist() for emb in embeddings["colbert_vecs"]]
+                if model_config["type"] == "flagembedding":
+                    lexical_weights = embeddings["lexical_weights"]
+                    sparse_indices = [[int(k) for k in d.keys()] for d in lexical_weights]
+                    sparse_values = [[float(v) for v in d.values()] for d in lexical_weights]
+                    colbert_embeddings = [emb.tolist() for emb in embeddings["colbert_vecs"]]
 
-                output_chunk = output_chunk.with_columns(
-                    pl.Series("bgem3_dense_vecs", embeddings["dense_vecs"]),
-                    pl.Series("bgem3_colbert_vecs", colbert_embeddings),
-                    pl.Series("bgem3_sparse_indices", sparse_indices),
-                    pl.Series("bgem3_sparse_values", sparse_values)
-                )
+                    output_chunk = output_chunk.with_columns(
+                        pl.Series("bgem3_dense_vecs", embeddings["dense_vecs"]),
+                        pl.Series("bgem3_colbert_vecs", colbert_embeddings),
+                        pl.Series("bgem3_sparse_indices", sparse_indices),
+                        pl.Series("bgem3_sparse_values", sparse_values)
+                    )
+
+                elif model_config["type"] == "gte":
+                    lexical_weights = embeddings["token_weights"]
+                    print(len(lexical_weights))
+                    print(embeddings["dense_embeddings"].cpu().shape)
+    
+                    sparse_indices = [list(d.keys()) for d in lexical_weights]
+                    sparse_values = [list(d.values()) for d in lexical_weights]
+                    
+                    output_chunk = output_chunk.with_columns(
+                        pl.Series("gte_dense_vecs", embeddings["dense_embeddings"].cpu()),
+                        pl.Series("gte_sparse_indices", sparse_indices),
+                        pl.Series("gte_sparse_values", sparse_values)
+                    )
+
             elif model_config["type"] == "pylate":
                 embeddings = [emb.tolist() for emb in embeddings]
                 output_chunk = output_chunk.with_columns(

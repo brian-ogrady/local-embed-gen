@@ -209,3 +209,5 @@ __marimo__/
 # Project specific
 data/*
 *ipynb
+.DS_Store
+*.out

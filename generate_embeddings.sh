@@ -10,12 +10,12 @@ source .venv/bin/activate
 
 # --- 2. Generate Embeddings ---
 echo "--- Generating embeddings ---"
-python scripts/generate_embeddings.py \
-    --input-file data/products_text.csv \
+python src/generate_embeddings.py \
+    --input-file data/text_ads.csv \
     --text-column text \
-    --output-file data/gtejina_colbert_product_embeddings.parquet \
+    --output-file data/gte_text_ads_embeddings.parquet \
     --model-config-path configs/supported_models.json \
-    --model-name jina_colbert \
+    --model-name gte \
     --chunksize 10000
 
 

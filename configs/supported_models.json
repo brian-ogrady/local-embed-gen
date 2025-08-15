@@ -30,12 +30,13 @@
             "id_key": "id"
         },
         "gte": {
-            "type": "sentencetransformers",
+            "type": "gte",
             "model_name": "Alibaba-NLP/gte-multilingual-base", 
             "output_key": "gte_vector", 
             "id_key": "id", 
-            "model_kwargs": {
-                "trust_remote_code": true
+            "encode_kwargs": {
+                "return_dense": true,
+                "return_sparse": true
             }
         },
         "qwen": {
